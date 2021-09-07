@@ -125,7 +125,7 @@ def _binary_search(lyst, target):
 
     Parameters
     ----------
-    lyst : list
+    lyst : List
         The list being searched
     target : int
         The item we are searching for in the list
@@ -148,6 +148,20 @@ def _binary_search(lyst, target):
 
 @time_it
 def binary_search(lyst, target):
+    """
+    Recursive helper function for _binary_search().
+    Allows for timing the function
+    Parameters
+    ----------
+    lyst : list
+        The list to be sorted
+    target : int
+        The target in the list
+
+    Returns
+    -------
+    Boolean: Is target in lyst?
+    """
     return _binary_search(lyst, target)
 
 
@@ -198,6 +212,20 @@ def _jump_search(lyst, target):
 
 @time_it
 def jump_search(lyst, target):
+    """
+    A recursive helper function for _jump_search().
+    Allows for timing of the function.
+    Parameters
+    ----------
+    lyst : List
+        The list to be searched
+    target : int
+        The target in the lyst
+
+    Returns
+    -------
+    Boolean: Is target in lyst?
+    """
     return _jump_search(lyst, target)
 
 

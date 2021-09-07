@@ -3,6 +3,7 @@ Contains three different searching algorithms:
   - A linear search algorithm
   - A binary search algorithm (Recursive)
   - A jump search algorithm (Recursive)
+Compares the time it takes to run each algorithm.
 """
 import time
 

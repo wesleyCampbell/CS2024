@@ -4,6 +4,45 @@ Contains three different searching algorithms:
   - A binary search algorithm (Recursive)
   - A jump search algorithm (Recursive)
 """
+import time
+
+
+def time_it(func):
+    """
+    Prints out to the console how much time a function
+    takes to run
+    Parameters
+    ----------
+    func : Function
+        The function to time
+
+    Returns
+    -------
+    wrap : Function
+        The wrapper function
+    """
+
+    def wrap(*args, **kwargs):
+        """
+        This function is a wrapper function for func.
+        It times how much time func takes to operate.
+        Parameters
+        ----------
+        args: The arguments for func
+        kwargs: The key-word arguments for func
+
+        Returns
+        -------
+        Object: The return value of func()
+        """
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+
+        print(f"{func.__name__} took {round((end-start) * 1000)} milliseconds")
+        return result
+
+    return wrap
 
 
 def make_data(length):
@@ -53,6 +92,7 @@ def test_jump_search():
     assert not jump_search(lyst, -1)
 
 
+@time_it
 def linear_search(lyst, target):
     """
     Performs a linear search for target in a given list.
@@ -78,14 +118,15 @@ def linear_search(lyst, target):
     return False
 
 
-def binary_search(lyst, target):
+def _binary_search(lyst, target):
     """
     Performs a binary search on a list.
     This function is recursive.
 
     Parameters
     ----------
-    lyst (list): The list
+    lyst : list
+        The list being searched
     target : int
         The item we are searching for in the list
 
@@ -100,12 +141,17 @@ def binary_search(lyst, target):
     elif lyst[mid] == target:
         return True
     elif lyst[mid] > target:
-        return binary_search(lyst[:mid], target)
+        return _binary_search(lyst[:mid], target)
     else:
-        return binary_search(lyst[mid+1:len(lyst)], target)
+        return _binary_search(lyst[mid+1:len(lyst)], target)
 
 
-def jump_search(lyst, target):
+@time_it
+def binary_search(lyst, target):
+    return _binary_search(lyst, target)
+
+
+def _jump_search(lyst, target):
     """
     Performs a recursive jump search on a list. It works by dividing the list into 10 segments.
     For each segment, perform another jump search if target is within the first and last value.
@@ -137,17 +183,22 @@ def jump_search(lyst, target):
         current = i * jump_length  # The current index of the sort
         if current > length - 1:  # If the current index is larger than the actual lyst
             # Perform a jump sort with the last values of lyst
-            return jump_search(lyst[previous:length], target)
+            return _jump_search(lyst[previous:length], target)
 
         elif lyst[current] == target:  # If the current index is the target
             return True
 
         elif lyst[current] > target:  # If the current index is LARGER than the target
             # Perform a recursive jump search from the previous index to the current index
-            return jump_search(lyst[previous:current], target)
+            return _jump_search(lyst[previous:current], target)
 
         # Update the previous index
         previous = current
+
+
+@time_it
+def jump_search(lyst, target):
+    return _jump_search(lyst, target)
 
 
 def main():
@@ -157,7 +208,12 @@ def main():
     -------
     None
     """
-    test_jump_search()
+    data_size = 1_000_000
+    print(data_size)
+    lyst = make_data(data_size)
+    linear_search(lyst, data_size // 2)
+    binary_search(lyst, data_size // 2)
+    jump_search(lyst, data_size // 2)
 
 
 if __name__ == "__main__":

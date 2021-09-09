@@ -236,12 +236,24 @@ def main():
     -------
     None
     """
-    data_size = 1_000_000
-    print(data_size)
+    data_size = 100_000_000
     lyst = make_data(data_size)
+    print("Begining Searches ... \n\n")
+
+    print("Beginning of list:")
+    linear_search(lyst, 1)
+    binary_search(lyst, 1)
+    jump_search(lyst, 1)
+
+    print("\nMiddle of list:")
     linear_search(lyst, data_size // 2)
     binary_search(lyst, data_size // 2)
     jump_search(lyst, data_size // 2)
+
+    print("\nEnd of list:")
+    linear_search(lyst, data_size - 1)
+    binary_search(lyst, data_size - 1)
+    jump_search(lyst, data_size - 1)
 
 
 if __name__ == "__main__":

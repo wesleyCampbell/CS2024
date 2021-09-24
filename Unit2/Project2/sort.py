@@ -155,7 +155,7 @@ def insertion_sort(lyst):
     return lyst
 
 
-def merge_sort(lyst):
+def mergesort(lyst):
     """
     Recursive helper function for _merge_sort()
 
@@ -238,7 +238,7 @@ def _merge(a, b):
     return merged
 
 
-def quick_sort(lyst):
+def quicksort(lyst):
     """
     The recursive helper function for the _quick_sort function.
 
@@ -308,7 +308,9 @@ def _partition(lyst, left, right):
         The index of the pivot value
     """
     # Assign the pivot value
-    pivot = _get_pivot(lyst, left, right)
+    # pivot = _get_pivot(lyst, left, right)
+    pivot = left
+    swap(lyst, pivot, right)
 
     # The pointer for values less than the pivot
     pointer = left - 1
@@ -366,18 +368,12 @@ def main():
     """
     The main function for sort.py
     """
-    selection = time_it(selection_sort)
-    insertion = time_it(insertion_sort)
-    merge = time_it(merge_sort)
-    quick = time_it(quick_sort)
+    data_gen = make_data(15)
 
-    data_size = 10000
-    data_gen = make_data(data_size)
+    data = next(data_gen)
+    sorted_data = quicksort(data)
 
-    for func in [selection, insertion, merge, quick]:
-        data = next(data_gen)
-        sorted_data = func(data)
-        print(f"The data is sorted: {is_sorted(sorted_data)}\n\n")
+    print(sorted_data)
 
 
 if __name__ == "__main__":

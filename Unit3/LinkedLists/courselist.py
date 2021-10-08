@@ -208,7 +208,48 @@ class CourseList:
         return output + str(current_course) + '\n'
 
     def __iter__(self):
-        pass
+        """
+        Returns an iterative helper class; initializes iteration
 
-    def __next__(self):
-        pass
+        Returns:
+        --------
+        (_CourseListIterativeHelper) : An iterative helper!ss
+        """
+        return _CourseListIterativeHelper(self)
+
+
+class _CourseListIterativeHelper:
+    def __init__(self, courselist: CourseList):
+        self._head = courselist.head
+
+    
+    def __iter__(self) -> object:
+        """
+        Initializes an iteration
+
+        Returns:
+        --------
+        (_CourseListIterativeHelper) : self
+        """
+        self._currentCourse = None
+        self._nextCourse = self._head
+
+        return self
+
+    
+    def __next__(self) -> int:
+        """
+        Returns the next course in an iteration.
+
+        Returns:
+        --------
+        (Int) : The Course number
+        """
+        if self._nextCourse is None:
+            raise StopIteration
+
+        self.currentCourse = self._nextCourse
+        self.nextCourse = self._nextCourse.next
+
+        return self.currentCourse.number()
+        

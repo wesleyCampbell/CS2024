@@ -12,10 +12,11 @@ def test_course_creation():
     # make sure that an empty course is correct
     c = Course()
     assert c.name() == ""
-    c.number() == 0 
+    c.number() == 0
     assert c.credit_hr() == 0.0
     assert c.grade() == 0.0
     assert c.next == None
+
 
 def test_course_creation_with_parameters():
     c = Course(1234, "Test Name", 3.0, 3.72)
@@ -49,6 +50,7 @@ def test_empty_courselist():
     assert cl.calculate_gpa() == 0.0
     assert cl.is_sorted()
 
+
 def test_insert():
     random.seed(0)
     cl = CourseList()
@@ -57,6 +59,7 @@ def test_insert():
 
     assert cl.size() == 37
     assert cl.is_sorted()
+
 
 def test_remove():
     random.seed(0)
@@ -79,6 +82,7 @@ def test_remove():
 
     assert cl.size() == 27
     assert cl.is_sorted()
+
 
 def test_remove_all():
     cl = CourseList()
@@ -105,6 +109,7 @@ def test_gpa():
 
     assert math.isclose(cl.calculate_gpa(), total_grade_points / total_credits)
 
+
 def test_iterate_list():
     cl = CourseList()
     cl.insert(Course(1000))
@@ -115,16 +120,21 @@ def test_iterate_list():
         totalCourses += 1
     assert totalCourses == 21
 
+
 def test_code_quality():
     from pylint.lint import Run
-    
+
     results = Run(['course.py'], exit=False)
     expected = 8.5
     actual = results.linter.stats['global_note']
     assert actual >= expected
-    
+
     results = Run(['courselist.py'], exit=False)
     expected = 8.5
     actual = results.linter.stats['global_note']
     assert actual >= expected
-    
+
+
+if __name__ == "__main__":
+    test_gpa()
+    print("done!")

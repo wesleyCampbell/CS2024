@@ -1,15 +1,24 @@
+"""
+Main driver file for the Linked Lists module
+"""
+
+import random
 from course import Course
 from courselist import CourseList
-import random
 
 
 def main():
+    """
+    The main function for main.py
+    """
     courselist = CourseList()
 
-    for i in range(2):
-        courselist.insert(Course(i+1))
+    for _ in range(10):
+        value = random.randint(0, 1000)
+        courselist.insert(Course(value))
 
-    print(courselist)
+    for course in courselist:
+        print(course)
 
 
 if __name__ == "__main__":

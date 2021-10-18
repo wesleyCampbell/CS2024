@@ -29,20 +29,20 @@ class Course:
         --------
         None
         """
-        if type(num) != int or num < 0:
-            raise(ValueError("Num must be positive integer"))
+        if not isinstance(num, int) or num < 0:
+            raise ValueError("Num must be positive integer")
         self._number = num
 
-        if type(name) != str:
-            raise(ValueError("Name must be String"))
+        if not isinstance(name, str):
+            raise ValueError("Name must be String")
         self._name = str(name)
 
-        if type(hours) != float or hours < 0:
-            raise(ValueError("Hours must be positive float"))
+        if not isinstance(hours, float) or hours < 0:
+            raise ValueError("Hours must be positive float")
         self._credit_hours = hours
 
-        if type(gpa) != float or gpa < 0:
-            raise(ValueError("GPA must be positive float"))
+        if not isinstance(gpa, float) or gpa < 0:
+            raise ValueError("GPA must be positive float")
         self._grade = gpa
 
         self.next = None

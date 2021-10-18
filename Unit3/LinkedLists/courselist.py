@@ -3,9 +3,6 @@ Provides the CourseList ADT.
 """
 
 
-from course import Course
-
-
 class CourseList:
     """
     A Linked list where each node is a Course
@@ -32,13 +29,30 @@ class CourseList:
         --------
         None
         """
-        # if self.head is None:
-        #     self.head = course
+        course_num = course.number()
+        current_course = self.head
+        is_head = True
 
-        temp = Course(course.number(), course.name(),
-                      course.credit_hr(), course.grade())
-        temp.set_next(self.head)
-        self.head = temp
+        if current_course is None:
+            self.head = course
+
+        else:
+            while current_course.next is not None and course_num >= current_course.next.number():
+                current_course = current_course.next
+                is_head = False
+
+            # If the current_course is not the head of the list
+            if not is_head:
+                course.set_next(current_course.next)
+                current_course.set_next(course)
+            # If the current course is the head of the list
+            else:
+                if course_num > current_course.number():
+                    course.set_next(self.head.next)
+                    self.head.set_next(course)
+                else:
+                    course.set_next(self.head)
+                    self.head = course
 
         self._size += 1
 
@@ -59,20 +73,19 @@ class CourseList:
         current_course = self.head
 
         # Traverse through each value until the course numbers match
-        while current_course.number() != number and current_course.next is not None:
+        while current_course.number() <= number and current_course.next is not None:
             previous_course = current_course
             current_course = current_course.next
 
         # If the course is not the first course in the list
         if current_course.number() == number and previous_course is not None:
             previous_course.set_next(current_course.next)
-            self._size -= 1
 
         # If the course is the first course in the list
         elif current_course.number() == number and previous_course is None:
             self.head = current_course.next
-            self._size -= 1
 
+        self._size -= 1
         del current_course
 
     def remove_all(self, number):
@@ -133,13 +146,13 @@ class CourseList:
         while current_course.next is not None:
             # If the course numbers match
             if current_course.number() == number:
-                return counter
+                return current_course
 
             # Increment
             current_course = current_course.next
             counter += 1
 
-        return -1 if current_course.number() != number else counter
+        return None if current_course.number() != number else current_course
 
     def size(self):
         """
@@ -166,6 +179,8 @@ class CourseList:
         while course.next is not None:
             gpa_sum += course.grade() * course.credit_hr()
             hr_sum += course.credit_hr()
+
+            course = course.next
 
         gpa_sum += course.grade() * course.credit_hr()
         hr_sum += course.credit_hr()
@@ -195,7 +210,7 @@ class CourseList:
             previous = current
             current = current.next
 
-        return current.number() < previous.number()
+        return current.number() > previous.number()
 
     def __str__(self) -> str:
         # Traverse each course and add it to string
@@ -213,7 +228,7 @@ class CourseList:
 
         Returns:
         --------
-        (_CourseListIterativeHelper) : An iterative helper!ss
+        (_CourseListIterativeHelper) : An iterative helper!
         """
         return _CourseListIterativeHelper(self)
 
@@ -222,7 +237,9 @@ class _CourseListIterativeHelper:
     def __init__(self, courselist: CourseList):
         self._head = courselist.head
 
-    
+        self._current_course = None
+        self._next_course = self._head
+
     def __iter__(self) -> object:
         """
         Initializes an iteration
@@ -231,12 +248,11 @@ class _CourseListIterativeHelper:
         --------
         (_CourseListIterativeHelper) : self
         """
-        self._currentCourse = None
-        self._nextCourse = self._head
+        self._current_course = None
+        self._next_course = self._head
 
         return self
 
-    
     def __next__(self) -> int:
         """
         Returns the next course in an iteration.
@@ -245,11 +261,10 @@ class _CourseListIterativeHelper:
         --------
         (Int) : The Course number
         """
-        if self._nextCourse is None:
+        if self._next_course is None:
             raise StopIteration
 
-        self.currentCourse = self._nextCourse
-        self.nextCourse = self._nextCourse.next
+        self._current_course = self._next_course
+        self._next_course = self._next_course.next
 
-        return self.currentCourse.number()
-        
+        return self._current_course.number()

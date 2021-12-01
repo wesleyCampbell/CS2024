@@ -30,6 +30,31 @@ class LinkedList:
         node.set_next(self.head)
         self.head = node
 
+    def remove(self, data):
+        """
+        Removes the first instance of a data
+
+        Paramaters:
+        -----------
+        data : String
+            The data being removed by the list
+        """
+        previous_node = None
+        current_node = self.head
+
+        while current_node.get_next() is not None:
+            if current_node.get_data() == data:
+                if previous_node is None:
+                    # If the current node is the head
+                    self.head = current_node.get_next()
+                else:
+                    # If the current node is in the middle
+                    # Point the previous node to the node after the current node
+                    previous_node.set_next(current_node.get_next())
+                break
+            previous_node = current_node
+            current_node = current_node.get_next()
+
     def pop(self):
         """
         Removes and returns the first element in the list
@@ -81,6 +106,8 @@ class _LinkedListIterativeHelper:
             The LinkedList being iterated through
         """
         self._head = linked_list.head
+        self._current_node = None
+        self._next_node = self._head
 
     def __iter__(self):
         """

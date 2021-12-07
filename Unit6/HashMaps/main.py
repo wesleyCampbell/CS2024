@@ -3,10 +3,26 @@ main.py
 Main file for the HashMap project
 """
 import sys
+import time
+from hashmap import HashMap
 
 WEIGHT = 200.00
+cache = HashMap()
 
-weight_calls = 0
+
+class Counter:
+    def __init__(self):
+        self.count = 0
+
+    def get_count(self):
+        return self.count
+
+    def increment(self):
+        self.count += 1
+
+
+function_counter = Counter()
+cache_counter = Counter()
 
 
 def weight_on(row, column):
@@ -19,12 +35,14 @@ def weight_on(row, column):
         The row of the person
     column : int
         The column of the person
+    counter : Counter
+        Used for tracking number of weight() calls
 
     Returns:
     --------
     The weight : float
     """
-    # Return the total weight of a person minus his personal w
+    # Return the total weight of a person minus his personal weight
     return weight(row, column) - WEIGHT
 
 
@@ -39,40 +57,95 @@ def weight(row, column):
     column : int
         The column of the person
 
+    counter : Counter
+        Tracks the total number of function calls
+
     Returns:
     The weight : float
     """
-    # If the person is on the top
-    weight_calls += 1
+    # Increment counter, if applicable
+    function_counter.increment()
+    output = 0
+    try:
+        output = cache.get((row, column))
+        cache_counter.increment()
+    except KeyError:
+        # If the person is on the top
+        # Base case
+        if (row, column) == (0, 0):
+            output = WEIGHT
+        # If there is no one on the left
+        elif column - 1 < 0:
+            output = WEIGHT + weight(row - 1, column) / 2
+        # If there is no one on the right
+        elif column > row - 1:
+            output = WEIGHT + weight(row - 1, column - 1) / 2
+        # If the person is internal
+        else:
+            output = WEIGHT + weight(row - 1, column - 1) / \
+                2 + weight(row - 1, column) / 2
 
-    # Base case
-    if (row, column) == (0, 0):
-        return WEIGHT
-
-    # If there is no one on the left
-    if column - 1 < 0:
-        return WEIGHT + weight(row - 1, column) / 2
-    # If there is no one on the right
-    elif column > row - 1:
-        return WEIGHT + weight(row - 1, column - 1) / 2
-    # If the person is internal
-    return WEIGHT + weight(row - 1, column - 1) / 2 + weight(row - 1, column) / 2
+        cache.set((row, column), output)
+    return output
 
 
-def main():
+def print_pyramid(row_num):
     """
-    The driver function
+    Prints the wieghts each person in a pyramid experiances
+
+    Paramaters:
+    -----------
+    row_num : int
+        The number of rows in the pyramid
+    counter : Counter
+        Used for tracking the number of calls of weight()
+
+    Returns:
+    --------
+    The text of the pyramid : str
     """
-    row_num = sys.argv[1]
+    output = ""
     for row in range(int(row_num)):
         line = ''
         for col in range(row + 1):
-            line += str(weight_on(row, col)) + " "
-        print(line)
+            line += "{:0.2f} ".format(weight_on(row, col))
+        # print(line)
+        output += line + "\n"
 
-    print("\n")
-    print(f"Function calls: {weight_calls}")
+    return output
+
+
+def main(row_num):
+    """
+    The driver function
+    Prints to the console and outputs to a file the pyramid
+
+    Paramaters:
+    -----------
+    row_num : int
+        The number of rows in the pyramid
+    """
+    # Time the function
+    begin = time.perf_counter()
+    pyramid = print_pyramid(row_num)
+
+    # Calculate stats
+    elapsed_time = time.perf_counter() - begin
+    function_calls = function_counter.get_count()
+    cache_hits = cache_counter.get_count()
+
+    # Append stats to output
+    pyramid += f"\nElapsed Time: {elapsed_time} seconds"
+    pyramid += f"\nNumber of Function Calls: {function_calls}"
+    pyramid += f"\nNumber of Cache Hits: {cache_hits}"
+
+    print("="*24 + "\n" + pyramid)
+
+    # Push the function output to the file
+    # with open("part2.txt", "w") as output:
+    #     output.write(pyramid)
 
 
 if __name__ == "__main__":
-    main()
+    rows = sys.argv[1]
+    main(rows)

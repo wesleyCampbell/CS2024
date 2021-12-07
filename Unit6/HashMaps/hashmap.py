@@ -70,8 +70,11 @@ class HashMap:
         # If there is a LinkedList at the index
         if not self.hash_keys[key_index].is_empty():
             # If the key is in the LinkedList, return the cooresponding value
-            index = self.hash_keys[key_index].find(hash_key)
-            return self.values[key_index].get(index)
+            try:
+                index = self.hash_keys[key_index].find(key)
+                return self.values[key_index].get(index)
+            except ValueError:
+                pass
         raise KeyError("The key is not in the HashMap")
 
     def set(self, key, value):
@@ -89,7 +92,7 @@ class HashMap:
         key_index = hash_key % self.bucket_num
 
         # Add the key to the linked list at the index
-        self.hash_keys[key_index].add(hash_key)
+        self.hash_keys[key_index].add(key)
         # Add the value to the linked list at the correct index
         self.values[key_index].add(value)
 
@@ -120,12 +123,12 @@ class HashMap:
         if not self.hash_keys[key_index].is_empty():
             # Verify that the key value is in linked list
             try:
-                self.hash_keys[key_index].find(hash_key)
+                self.hash_keys[key_index].find(key)
             except ValueError:
                 return
             # Remove the cooresponding value from values cataloug
             # Remove the key from the linked list
-            self.hash_keys[key_index].remove(hash_key)
+            self.hash_keys[key_index].remove(key)
             # Remove the key from the keys cataloug
             self._keys.remove(key)
 

@@ -13,13 +13,13 @@ class HashMap:
     Atributes:
     ----------
     self.bucket_num : Int
-        The number of buckets or 
-    self.keys : List
+        The number of buckets or
+    self._keys : List
         The list of keys not hashed
     self.hash_keys : List<LinkedList>
         The keys for each bucket. List[0] is the keys for the first bucket a
         and so on
-    self.values : List<LinkedList> 
+    self.values : List<LinkedList>
         The values for each bucket. List[0] is the list of the values
         for the first bucket and so on
 
@@ -30,7 +30,8 @@ class HashMap:
     remove(key): Remove the key and its corresponding value
     capacity(): The number of buckets in the Map
     size(): The number of key-value pairs in the Map
-    keys(): Return the keys 
+    keys(): Return the keys
+    clear(): Clears the hashmap and resets the number of buckets
     """
 
     def __init__(self, bucket_num=7):
@@ -44,10 +45,9 @@ class HashMap:
         """
         self.bucket_num = bucket_num
 
-        self.keys = []
-        self._values = []
+        self._keys = []
         self.hash_keys = [LinkedList() for _ in range(self.bucket_num)]
-        self.values = [None for _ in range(self.bucket_num)]
+        self.values = [LinkedList() for _ in range(self.bucket_num)]
 
         self._size = 0
 
@@ -94,10 +94,15 @@ class HashMap:
         self.values[key_index].add(value)
 
         # Add the key and values to the keys and values list
-        self.keys.append(key)
-        self._values.append(key)
+        self._keys.append(key)
 
         self._size += 1
+
+        # If 80% of the buckets are full rehash
+        if self._load_factor() >= 0.80:
+            new_hash = HashMap.rehash(self)
+            # Set self to the new hashmap
+            self._set_self(new_hash)
 
     def remove(self, key):
         """
@@ -119,11 +124,10 @@ class HashMap:
             except ValueError:
                 return
             # Remove the cooresponding value from values cataloug
-            self._values.remove()
             # Remove the key from the linked list
             self.hash_keys[key_index].remove(hash_key)
             # Remove the key from the keys cataloug
-            self.keys.remove(key)
+            self._keys.remove(key)
 
         self._size += 1
 
@@ -158,9 +162,56 @@ class HashMap:
         List<tuple>
             The list of keys
         """
-        return self.keys
+        return self._keys
 
-    # TODO: Finish this
+    def clear(self, bucket_num=7):
+        """
+        Clears the HashMap and resets the number of buckets
+
+        Paramaters:
+        -----------
+        bucket_num : int
+            The number of buckets. Defaults to 7 (A prime number)
+        """
+        self.bucket_num = bucket_num
+
+        self.hash_keys = [LinkedList() for _ in range(self.bucket_num)]
+        self.values = [LinkedList() for _ in range(self.bucket_num)]
+        self._keys = []
+
+        self._size = 0
+
+    def _load_factor(self):
+        """
+        Calculates the load factor of the HashMap,
+        namely (The number of used buckets) / (total number of buckets)
+
+        Returns:
+        --------
+        the load factor : Float
+        """
+        # The number of LinkedLists that contain data
+        num_full = sum([1 * (0 if x.is_empty() else 1)
+                       for x in self.hash_keys])
+
+        return num_full / self.bucket_num
+
+    def _set_self(self, hashmap):
+        """
+        Sets self into the given hashmap
+
+        Paramaters:
+        -----------
+        hashmap : HashMap
+            The new hashmap
+        """
+        self.bucket_num = hashmap.capacity()
+
+        self.hash_keys = hashmap.hash_keys
+        self.values = hashmap.values
+        self._keys = hashmap.keys()
+
+        self._size = hashmap.size()
 
     @staticmethod
     def rehash(hashmap):
@@ -179,6 +230,16 @@ class HashMap:
         """
         current_capacity = hashmap.capacity()
         new_capacity = HashMap.next_prime(current_capacity)
+
+        new_hashmap = HashMap(new_capacity)
+
+        keys = hashmap.keys()
+
+        # Add the old key-value pairs into the new hashmap
+        for key in keys:
+            new_hashmap.set(key, hashmap.get(key))
+
+        return new_hashmap
 
     @staticmethod
     def next_prime(last_prime):

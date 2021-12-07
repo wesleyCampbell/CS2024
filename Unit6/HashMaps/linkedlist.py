@@ -56,6 +56,7 @@ class LinkedList:
                     self.head = current_node.get_next()
                 else:
                     previous_node.set_next(current_node.get_next())
+                return
 
             previous_node = current_node
             current_node = current_node.get_next()
@@ -68,6 +69,7 @@ class LinkedList:
                 self.head = current_node.get_next()
             else:
                 previous_node.set_next(current_node.get_next())
+            return
 
         raise ValueError("data is not in LinkedList")
 

@@ -3,6 +3,7 @@ graph.py
 Contains the Graph ADT and small test driver function
 """
 import math
+from typing import Generator
 
 import pytest
 
@@ -13,6 +14,7 @@ class Graph:
 
     Attributes:
     -----------
+    vertex_num: (int): The number of verticies in the graph
 
     Methods:
     --------
@@ -96,6 +98,15 @@ class Graph:
     def bfs(self, starting_vertex):
         """
         Returns a generator for bredth-first traversal of the graph
+
+        Paramaters:
+        -----------
+        starting_vertex : str
+            The label of the starting vertex
+
+        Returns:
+        --------
+        (Generator) : A generator for the traversal
         """
         # The list of verticies that have been visited before
         visited_verticies = []
@@ -123,23 +134,37 @@ class Graph:
     def dfs(self, starting_vertex):
         """
         Returns a generator for traversing the graph in depth-first traversal
+
+        Paramaters:
+        -----------
+        starting_vertex : str
+            The label of the starting vertex
+
+        Returns:
+        --------
+        (Generator) : A generator for the traversal
         """
         visited = []
+        current_vertex = self.verticies[starting_vertex]
+        vertex_stack = [current_vertex]
 
-        def dfs_helper(vertex):
-            # Get all the child Verticies of node that have not already been visited
-            children = [
-                neighbor for neighbor in vertex.neighbors if neighbor not in visited]
-            # If node has no neighbors that are not visited
-            if not len(children):
-                return vertex
+        while len(vertex_stack):
+            # Pop the top vertex off the stack and return it
+            current_vertex = vertex_stack.pop()
+            visited.append(current_vertex)
+            yield current_vertex
 
-            # Go down each child node
-            for child_vertex in children:
-                return dfs_helper(child_vertex)
+            # Push the current vertex's neighbors that have not been visited onto the stack
+            neighbors = [v for v in current_vertex.neighbors.keys()
+                         if v not in visited]
+            for neighbor in neighbors:
+                vertex_stack.append(neighbor)
 
-        vertex = self.verticies[starting_vertex]
-        yield dfs_helper(vertex)
+    def dsp(self, src, dest):
+        """
+
+        """
+        pass
 
     def __str__(self):
         output = 'digraph G {\n'
@@ -252,26 +277,24 @@ def main():
     graph = Graph()
 
     graph.add_vertex("A")
-    graph.add_vertex("Ba")
-    graph.add_vertex("Bb")
+    graph.add_vertex('B')
+    graph.add_vertex('C')
+    graph.add_vertex('D')
+    graph.add_vertex('E')
+    graph.add_vertex('F')
 
-    graph.add_vertex("Ca")
-    graph.add_vertex("Cb")
-    graph.add_vertex("Cc")
-
-    graph.add_edge("A", 'Ba', 3.2)
-    graph.add_edge("A", "Bb", 2.1)
-
-    graph.add_edge("Ba", "Ca", 3.0)
-    graph.add_edge("Ba", "Cb", 1.2)
-    graph.add_edge("Bb", "Cc", 2.2)
+    graph.add_edge('A', 'B', 1.0)
+    graph.add_edge('B', 'D', 1.0)
+    graph.add_edge('A', 'C', 1.0)
+    graph.add_edge('C', 'E', 1.0)
+    graph.add_edge('E', 'F', 1.0)
 
     print(graph)
 
     print("#"*44 + "\n")
 
-    for node in graph.dfs("A"):
-        print(node)
+    for vertex in graph.dfs("A"):
+        print(vertex)
 
 
 def pytest_finangling():

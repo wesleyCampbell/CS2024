@@ -2,6 +2,9 @@
 graph.py
 Contains the Graph ADT and small test driver function
 """
+import math
+
+import pytest
 
 
 class Graph:
@@ -46,6 +49,8 @@ class Graph:
         self.vertex_num += 1
         self.verticies[label] = Vertex(label)
 
+        return self
+
     def add_edge(self, src, dest, w):
         """
         Adds an edge between source Vertex and destination Vertex
@@ -59,12 +64,94 @@ class Graph:
         w : float
             The weight of the edge
         """
+        if not isinstance(w, float) and not isinstance(w, int):
+            raise ValueError("Edge weight must be float")
+
         try:
             source = self.verticies[src]
             destination = self.verticies[dest]
-            source.add_neighbor(destination, w)
+            source.add_neighbor(destination, float(w))
         except KeyError:
-            raise ValueError("src || dest || w not valid!")
+            raise ValueError("src || dest not valid!")
+
+        return self
+
+    def get_weight(self, src, dest):
+        """
+        Returns the weight of an edge between source and destination
+
+        Paramaters:
+        -----------
+        src : Vertex
+            The source Vertex
+        dest: Vertex
+            The destination Vertex
+
+        :return: float: The weight of the edge
+        """
+        src_vertex = self.verticies[src]
+        dest_vertex = self.verticies[dest]
+        return src_vertex.get_weight(dest_vertex)
+
+    def bfs(self, starting_vertex):
+        """
+        Returns a generator for bredth-first traversal of the graph
+        """
+        # The list of verticies that have been visited before
+        visited_verticies = []
+        # The current level of verticies
+        current_verticies = [self.verticies[starting_vertex]]
+
+        # While there are still verticies to traverse
+        while len(current_verticies):
+            temp_list = []  # Temporary list used for storing verticies
+            # For each vertex in the current level
+            for vertex in current_verticies:
+                # Add each neighbor of the vertex to the temp_list
+                for neighbor in vertex.neighbors.keys():
+                    # If the neighbor vertex has already been visited, pass over it
+                    if neighbor not in visited_verticies:
+                        temp_list.append(neighbor)
+
+                # Mark the current vertex as visited
+                visited_verticies.append(vertex)
+                # Yield the current vertex
+                yield vertex
+            # Set the current level of verticies to the temp list
+            current_verticies = temp_list
+
+    def dfs(self, starting_vertex):
+        """
+        Returns a generator for traversing the graph in depth-first traversal
+        """
+        visited = []
+
+        def dfs_helper(vertex):
+            # Get all the child Verticies of node that have not already been visited
+            children = [
+                neighbor for neighbor in vertex.neighbors if neighbor not in visited]
+            # If node has no neighbors that are not visited
+            if not len(children):
+                return vertex
+
+            # Go down each child node
+            for child_vertex in children:
+                return dfs_helper(child_vertex)
+
+        vertex = self.verticies[starting_vertex]
+        yield dfs_helper(vertex)
+
+    def __str__(self):
+        output = 'digraph G {\n'
+        for vertex in self.verticies.values():
+            for neighbor in vertex.neighbors.keys():
+                v_label = vertex.label
+                n_label = neighbor.label
+                weight = vertex.neighbors[neighbor]
+                output += f"   {v_label} -> {n_label} [label=\"{weight}\",weight=\"{weight}\"];\n"
+
+        output += "}\n"
+        return output
 
 
 class Vertex:
@@ -81,6 +168,7 @@ class Vertex:
     Methods:
     --------
     add_neighbor(vertex): Adds a pointer to another vertex
+    get_weight(neighbor): Returns the weight of the edge pointing to neighbor
     """
 
     def __init__(self, label):
@@ -107,3 +195,117 @@ class Vertex:
         except KeyError:
             self.neighbors[vertex] = w
             self.neighbors_num += 1
+
+    def get_weight(self, neighbor):
+        """
+        Returns the weight of an edge to a neighbor
+
+        Paramaters:
+        -----------
+        neighbor : Vertex
+            The neighbor
+
+        :return: float: The weight of the edge
+        """
+        try:
+            return self.neighbors[neighbor]
+        except KeyError:
+            return math.inf
+
+    def __str__(self):
+        """
+        String form of Vertex
+        """
+        return self.label
+
+    def __repr__(self):
+        """
+        Representation of Vertex
+        """
+        return self.label
+
+    def __eq__(self, other):
+        """
+        Overload of the equals operator.
+        Compare to self.label
+
+        Paramaters:
+        -----------
+        other : str || Vertex
+        """
+        if isinstance(other, Vertex):
+            return self.label == other.label
+        elif isinstance(other, str):
+            return self.label == other
+        else:
+            raise ValueError(
+                "Can only compare equality of Vertex to Vertex or String")
+
+    def __hash__(self):
+        """
+        Overload of the builtin hash method
+        """
+        return hash(self.label)
+
+
+def main():
+    graph = Graph()
+
+    graph.add_vertex("A")
+    graph.add_vertex("Ba")
+    graph.add_vertex("Bb")
+
+    graph.add_vertex("Ca")
+    graph.add_vertex("Cb")
+    graph.add_vertex("Cc")
+
+    graph.add_edge("A", 'Ba', 3.2)
+    graph.add_edge("A", "Bb", 2.1)
+
+    graph.add_edge("Ba", "Ca", 3.0)
+    graph.add_edge("Ba", "Cb", 1.2)
+    graph.add_edge("Bb", "Cc", 2.2)
+
+    print(graph)
+
+    print("#"*44 + "\n")
+
+    for node in graph.dfs("A"):
+        print(node)
+
+
+def pytest_finangling():
+    g = Graph()
+    g.add_vertex("A")
+    g.add_vertex("B")
+    g.add_vertex("C")
+    g.add_vertex("D")
+    g.add_vertex("E")
+    g.add_vertex("F")
+
+    g.add_edge("A", "B", 1.0)
+    g.add_edge("A", "C", 1.0)
+
+    g.add_edge("B", "D", 1.0)
+
+    g.add_edge("C", "E", 1.0)
+
+    g.add_edge("E", "F", 1.0)
+
+    expected = '''digraph G {
+   A -> B [label="1.0",weight="1.0"];
+   A -> C [label="1.0",weight="1.0"];
+   B -> D [label="1.0",weight="1.0"];
+   C -> E [label="1.0",weight="1.0"];
+   E -> F [label="1.0",weight="1.0"];
+}
+'''
+    output = str(g)
+    # assert output == expected
+    print(expected)
+    print(output)
+    print(expected == output)
+
+
+if __name__ == "__main__":
+    main()

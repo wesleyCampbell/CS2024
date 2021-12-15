@@ -141,6 +141,87 @@ class Graph:
         vertex = self.verticies[starting_vertex]
         yield dfs_helper(vertex)
 
+    def dsp(self, src, dest):
+        """
+        Dijsktra's Shortest Path algorithm.
+        Given a source Vertex, find the shortest path to a
+        destination Vertex
+
+        Paramaters:
+        -----------
+        src : str
+            The label of the source Vertex
+        dest : str
+            The label of the destination Vertex
+
+        Returns:
+        --------
+        List : [float : distance, List<Vertex> : The path]
+        """
+        vertex_set = []
+        dist = {}
+        # A dictionary used for pointing to the previous visited
+        # Vertex of a Vertex
+        previous_vertex = {}
+
+        src_vertex = self.verticies[src]
+        dest_vertex = self.verticies[dest]
+
+        for vertex in self.verticies.values():
+            dist[vertex] = math.inf
+            vertex_set.append(vertex)
+            previous_vertex[vertex] = None
+
+        dist[src_vertex] = 0
+
+        # While the vertex set is not empty
+        while len(vertex_set):
+            # Get the vertex with the minimum distance from source.
+            # Will always be the source first
+            min_vertex = self._min_distance(vertex_set, dist)
+            vertex_set.remove(min_vertex)
+
+            for neighbor in min_vertex.neighbors:
+                alt_dist = dist[min_vertex] + min_vertex.get_weight(neighbor)
+                if alt_dist < dist[neighbor]:
+                    dist[neighbor] = alt_dist
+                    previous_vertex[neighbor] = min_vertex
+
+        # Get the path followed
+        previous = dest_vertex if dist[dest_vertex] is not math.inf else None
+        path = []
+
+        while previous is not None:
+            path.append(previous)
+            previous = previous_vertex[previous]
+
+        path.reverse()
+        return dist[dest_vertex], path
+
+    def _min_distance(self, domain, distances):
+        """
+        Utility function for dsp()
+        Returns the vertex with the minimum distance
+
+        Paramaters:
+        -----------
+        domain : list<Vertex>
+            The list of valid verticies
+        distance : dict<Vertex, float : distance>
+            The vertex distances
+
+        Returns:
+        --------
+        (Vertex) : The vertex with min distance
+        """
+        # Set the min to the first valid vertex
+        min_dist = (domain[0], distances[domain[0]])
+        for vertex in domain:
+            if distances[vertex] < min_dist[1]:
+                min_dist = (vertex, distances[vertex])
+
+        return min_dist[0]
+
     def __str__(self):
         output = 'digraph G {\n'
         for vertex in self.verticies.values():
@@ -270,8 +351,8 @@ def main():
 
     print("#"*44 + "\n")
 
-    for node in graph.dfs("A"):
-        print(node)
+    print("Dist from A to Cc: ")
+    print(graph.dsp("A", "Cc"))
 
 
 def pytest_finangling():

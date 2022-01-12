@@ -241,6 +241,33 @@ class Graph:
 
         return min_dist[0]
 
+    def dsp_all(self, src):
+        """
+        Runs the dsp shortest path algorithm on all nodes from source
+
+        Paramaters:
+        -----------
+        src : str
+            The label of the source vertex
+
+        Returns:
+        --------
+        dict<str : dest vertex label, list<str : vertex label> : the pathway >
+        """
+        # The list of all nodes except the source vertex
+        source_vertex = self.verticies[src]
+        nodes = list(self.verticies.values())
+        # nodes.remove(source_vertex)
+
+        output = {}
+
+        # For every node, run the dsp algorithm
+        for node in nodes:
+            path = self.dsp(src, node)[1]
+            output[node.label] = path
+
+        return output
+
     def __str__(self):
         output = 'digraph G {\n'
         for vertex in self.verticies.values():
@@ -381,29 +408,30 @@ def pytest_finangling():
     g.add_vertex("E")
     g.add_vertex("F")
 
-    g.add_edge("A", "B", 1.0)
-    g.add_edge("A", "C", 1.0)
+    g.add_edge("A", "B", 2)
+    g.add_edge("A", "F", 9)
 
-    g.add_edge("B", "D", 1.0)
+    g.add_edge("B", "F", 6)
+    g.add_edge("B", "D", 15)
+    g.add_edge("B", "C", 8)
 
-    g.add_edge("C", "E", 1.0)
+    g.add_edge("C", "D", 1)
 
-    g.add_edge("E", "F", 1.0)
+    g.add_edge("E", "C", 7)
+    g.add_edge("E", "D", 3)
 
-    expected = '''digraph G {
-   A -> B [label="1.0",weight="1.0"];
-   A -> C [label="1.0",weight="1.0"];
-   B -> D [label="1.0",weight="1.0"];
-   C -> E [label="1.0",weight="1.0"];
-   E -> F [label="1.0",weight="1.0"];
-}
-'''
-    output = str(g)
-    # assert output == expected
-    print(expected)
-    print(output)
-    print(expected == output)
+    g.add_edge("F", "B", 6)
+    g.add_edge("F", "E", 3)
+
+    paths = g.dsp_all("A")
+    assert isinstance(paths, dict)
+    assert paths == {'A': ['A'], 'B': ['A', 'B'], 'C': ['A', 'B', 'C'], 'D': [
+        'A', 'B', 'C', 'D'], 'E': ['A', 'B', 'F', 'E'], 'F': ['A', 'B', 'F']}
+
+    paths = g.dsp_all("D")
+    assert isinstance(paths, dict)
+    assert paths == {'A': [], 'B': [], 'C': [], 'D': ['D'], 'E': [], 'F': []}
 
 
 if __name__ == "__main__":
-    main()
+    pytest_finangling()
